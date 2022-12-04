@@ -141,21 +141,21 @@ void SEGDisplayYOYO(RtcDateTime now) {
 uint8_t mode = 1;
 void setMode() {
   if (mode == 1) {
-    currentTimes = micros();
-    if(currentTimes - previousTimes > 20000000) {
+    currentTimes = millis();
+    if(currentTimes - previousTimes > 20000) {
       previousTimes = currentTimes;
       mode = 2;
     }
   }
   else if(mode == 2) {
-    currentTimes = micros();
-    if(currentTimes - previousTimes > 7000000) {
+    currentTimes = millis();
+    if(currentTimes - previousTimes > 6000) {
       previousTimes = currentTimes;
       mode = 1;
     }
   }
 
-   if (currentTimes < previousTimes) {previousTimes = 0; Serial.println("RESET TIME");}
+   if (currentTimes < previousTimes) {previousTimes = 0;}
 }
 
 
