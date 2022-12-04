@@ -18,14 +18,10 @@ const uint8_t SEG_SET[] = {
 	SEG_A   // _
 	};
 
-// DS1302
-#include <ThreeWire.h>
-#include <RtcDS1302.h>
-#define CLK D5
-#define DAT D4
-#define RST D2
-ThreeWire wire(DAT, CLK, RST);
-RtcDS1302<ThreeWire> Rtc(wire);
+// DS3230
+#include <Wire.h>
+#include <RtcDS3231.h>
+RtcDS3231<TwoWire> Rtc(Wire);
 
 const char* ssid = "NatchPai";                           
 const char* password = "powerpay4";  
@@ -61,21 +57,8 @@ void setup() {
   timeClient.begin();
 }
 
-void checkStateRTC() {
-  //แก้ป้องกันการเขียนข้อมูลทับ
-  if (Rtc.GetIsWriteProtected()) {
-    Serial.println("RTC was write protected, enabling writing now");
-    Rtc.SetIsWriteProtected(false);
-    // ค่าเวลามาตราฐาน
-    // Rtc.SetDateTime(DefaultDateTime);
-  }
-  // ปิดการทำงาน RTC ถ้าปิดอยู่
-  if (!Rtc.GetIsRunning()) {
-    Serial.println("RTC was not actively running, starting now");
-    Rtc.SetIsRunning(true);
-  }
-}
 
+// Wifi ESP8266 > below
 void checkStatusWifi() {
   if(WiFi.status() == WL_CONNECTED) {
     // Serial.println("Connect");
@@ -104,6 +87,19 @@ void autoPullData() {
   if (currentTimes < previousTimes) {previousPullDataTimes = 0;}
 }
 
+
+// Real Time Clock > below
+void checkStateRTC() {
+  // ปิดการทำงาน RTC ถ้าปิดอยู่
+  if (!Rtc.GetIsRunning()) {
+    Serial.println("RTC was not actively running, starting now");
+    Rtc.SetIsRunning(true);
+  }
+
+  Rtc.Enable32kHzPin(false);
+  Rtc.SetSquareWavePin(DS3231SquareWavePin_ModeNone); 
+}
+
 void updateDate() {
   timeClient.update();
   time_t epochTime = timeClient.getEpochTime();
@@ -120,6 +116,8 @@ void updateDate() {
 
 }
 
+
+// 7 Segment > below
 String editDate(uint8_t data) {
   if (data >= 0 && data <= 9) {
     return '0' + String(data);
@@ -139,33 +137,34 @@ void SEGDisplayYOYO(RtcDateTime now) {
   display.showNumberDecEx(DATE.toInt(), dot, true);
 }
 
+
 uint8_t mode = 1;
 void setMode() {
   if (mode == 1) {
-    currentTimes = millis();
-    if(currentTimes - previousTimes > 20000) {
+    currentTimes = micros();
+    if(currentTimes - previousTimes > 20000000) {
       previousTimes = currentTimes;
       mode = 2;
     }
   }
   else if(mode == 2) {
-    currentTimes = millis();
-    if(currentTimes - previousTimes > 5000) {
+    currentTimes = micros();
+    if(currentTimes - previousTimes > 7000000) {
       previousTimes = currentTimes;
       mode = 1;
     }
   }
 
-   if (currentTimes < previousTimes) {previousTimes = 0;}
+   if (currentTimes < previousTimes) {previousTimes = 0; Serial.println("RESET TIME");}
 }
 
-int i = 1000;
+
 void loop() {
   // put your main code here, to run repeatedly: 
   checkStatusWifi();
   setMode();
-  RtcDateTime now = Rtc.GetDateTime();
   if (mode == 1) {
+    RtcDateTime now = Rtc.GetDateTime();
     SEGDisplayYOYO(now);
   }
   else if (mode == 2) {
