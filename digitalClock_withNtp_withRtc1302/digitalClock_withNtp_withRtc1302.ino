@@ -68,6 +68,22 @@ void setup() {
   // dht.begin();
 }
 
+// ////////////////////////////////////////////////////////////////////////////
+// Wifi ESP8266 > below
+void checkStatusWifi() {
+  if(WiFi.status() == WL_CONNECTED) {
+    // Serial.println("Connect");
+    autoPullData();
+  }
+  else{
+    // Serial.println("...Disconnect");
+    onePullQuota = true;
+  }
+}
+
+
+// ////////////////////////////////////////////////////////////////////////////
+// Real Time Clock > below
 void checkStateRTC() {
   //แก้ป้องกันการเขียนข้อมูลทับ
   if (Rtc.GetIsWriteProtected()) {
@@ -80,17 +96,6 @@ void checkStateRTC() {
   if (!Rtc.GetIsRunning()) {
     Serial.println("RTC was not actively running, starting now");
     Rtc.SetIsRunning(true);
-  }
-}
-
-void checkStatusWifi() {
-  if(WiFi.status() == WL_CONNECTED) {
-    // Serial.println("Connect");
-    autoPullData();
-  }
-  else{
-    // Serial.println("...Disconnect");
-    onePullQuota = true;
   }
 }
 
@@ -111,6 +116,7 @@ void autoPullData() {
   if (currentTimes < previousTimes) {previousPullDataTimes = 0;}
 }
 
+
 void updateDate() {
   timeClient.update();
   time_t epochTime = timeClient.getEpochTime();
@@ -127,6 +133,8 @@ void updateDate() {
 
 }
 
+// ////////////////////////////////////////////////////////////////////////////
+// 7 Segment > below
 String editDate(uint8_t data) {
   if (data >= 0 && data <= 9) {
     return '0' + String(data);
@@ -146,6 +154,9 @@ void SEGDisplayYOYO(RtcDateTime now) {
   display.showNumberDecEx(DATE.toInt(), dot, true);
 }
 
+
+// ////////////////////////////////////////////////////////////////////////////
+// More Option
 uint8_t mode = 1;
 void setMode() {
   if (mode == 1) {
@@ -166,7 +177,8 @@ void setMode() {
    if (currentTimes < previousTimes) {previousTimes = 0;}
 }
 
-
+// ////////////////////////////////////////////////////////////////////////////
+// MAIN
 void loop() {
   checkStatusWifi();
   setMode();

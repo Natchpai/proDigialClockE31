@@ -70,6 +70,19 @@ void checkStatusWifi() {
   }
 }
 
+
+
+// Real Time Clock > below
+void checkStateRTC() {
+  // ปิดการทำงาน RTC ถ้าปิดอยู่
+  if (!Rtc.GetIsRunning()) {
+    Rtc.SetIsRunning(true);
+  }
+
+  Rtc.Enable32kHzPin(false);
+  Rtc.SetSquareWavePin(DS3231SquareWavePin_ModeNone); 
+}
+
 void autoPullData() {
   if (onePullQuota) {
     display.setSegments(SEG_SET);
@@ -85,19 +98,6 @@ void autoPullData() {
   }
 
   if (currentTimes < previousTimes) {previousPullDataTimes = 0;}
-}
-
-
-// Real Time Clock > below
-void checkStateRTC() {
-  // ปิดการทำงาน RTC ถ้าปิดอยู่
-  if (!Rtc.GetIsRunning()) {
-    Serial.println("RTC was not actively running, starting now");
-    Rtc.SetIsRunning(true);
-  }
-
-  Rtc.Enable32kHzPin(false);
-  Rtc.SetSquareWavePin(DS3231SquareWavePin_ModeNone); 
 }
 
 void updateDate() {
@@ -168,7 +168,8 @@ void loop() {
     SEGDisplayYOYO(now);
   }
   else if (mode == 2) {
-    display.showNumberHexEx(0x12c);
+    RtcTemperature temp = Rtc.GetTemperature();
+    display.showNumberDec(temp.AsFloatDegC());
   }
 
 }
