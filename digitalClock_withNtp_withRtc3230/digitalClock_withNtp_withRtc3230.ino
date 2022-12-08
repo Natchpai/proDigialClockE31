@@ -5,8 +5,8 @@
 //7-SEGMENT
 #include <Arduino.h>
 #include <TM1637Display.h>
-#define CLK D6
-#define DIO D7
+#define CLK D3
+#define DIO D4
 TM1637Display display(CLK, DIO);
 uint8_t dot = 64; // 0b01000000
 uint8_t BRIGHT = 0;
