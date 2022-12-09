@@ -217,14 +217,26 @@ unsigned int countSquare;
 
 void setMode() {
   SquareWave = digitalRead(SquareWave_pin);
-  if (SquareWave != oldStat) {
-    countSquare++;
-    oldStat = SquareWave;
+  // 1 Hz SquareWave to 1s.
+  if (SquareWave == 1) {
+    if(oldStat == 0) {
+      countSquare++;
+      oldStat = 1;
+    }
+  }
+  else if(SquareWave == 0) {
+    oldStat = 0;
   }
 
+  // 1 Hz SquareWave to 500ms.
+  // if (SquareWave != oldStat) {
+  //   countSquare++;
+  //   oldStat = SquareWave;
+  // }
+
   if (mode == 1) {
-    // 42 Seconds, 2 is constant
-    if(countSquare == (42 * 2) ) { 
+    // 42 Seconds
+    if(countSquare == (42) ) { 
       countSquare = 0;
       digitalWrite(DOTpin, 0);
       mode = 2;
@@ -232,14 +244,15 @@ void setMode() {
   }
 
   else if(mode == 2) {
-    // 8 Seconds, 2 is constant{
-    if(countSquare == (8 * 2) ) {
+    // 8 Seconds
+    if(countSquare == (8) ) {
       countSquare = 0;
       digitalWrite(DOTpin, 0);
       mode = 1;
     }
   }
 }
+
 
 void blinkDot() { 
   if (SquareWave == 1) {
@@ -251,7 +264,6 @@ void blinkDot() {
 }
 
 
-
 void loop() {
   setMode();
   checkStatusWifi();
@@ -260,8 +272,8 @@ void loop() {
     RtcDateTime now = Rtc.GetDateTime();
     SEGDisplayYOYO(now);
     analyzeData(now);
-    // LatchData(digits[hour_First], digits[hour_End], digits[minute_First], digits[minute_End], digits[second_First], digits[second_End]);
-    LatchData(digits[second_First], digits[second_End], digits[hour_First], digits[hour_End], digits[minute_First], digits[minute_End]);
+    LatchData(digits[hour_First], digits[hour_End], digits[minute_First], digits[minute_End], digits[second_First], digits[second_End]);
+    // LatchData(digits[second_First], digits[second_End], digits[hour_First], digits[hour_End], digits[minute_First], digits[minute_End]);
   }
   else if (mode == 2) {
     RtcTemperature temp = Rtc.GetTemperature();
