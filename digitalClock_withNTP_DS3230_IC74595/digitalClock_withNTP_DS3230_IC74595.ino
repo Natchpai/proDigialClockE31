@@ -19,7 +19,7 @@ const uint8_t SEG_SET[] = {
 	};
 
 // Shift Register SN74HC595N 8-bit SIPO
-#define SRCLK D8
+#define SRCLK D8 
 #define SER_DATA D6 
 #define LATCH D7
 #define DOTpin D5
@@ -73,10 +73,38 @@ void setup() {
   pinMode(SRCLK, OUTPUT);
   pinMode(SER_DATA, OUTPUT);
   pinMode(DOTpin, OUTPUT);
+
+  TestStart();
 }
 
+void TestStart() {
+  for(int i=9;i>=0;i--) {
+    digitalWrite(LATCH, 0);
+    shiftOut(SER_DATA, SRCLK, LSBFIRST, digits[i]);
+    digitalWrite(DOTpin, !digitalRead(DOTpin));
+    digitalWrite(LATCH, 1);
+    digitalWrite(LATCH, 0);
+    delay(150);
+  }
+  for(int i=0;i<=4;i++) {
+    digitalWrite(LATCH, 0);
+    shiftOut(SER_DATA, SRCLK, LSBFIRST, 0b00000000);
+    digitalWrite(LATCH, 1);
+    digitalWrite(LATCH, 0);
+    delay(150);
+  }
+}
 
-
+void display_SET() {
+  digitalWrite(LATCH, 0);
+  shiftOut(SER_DATA, SRCLK, LSBFIRST, 0b00001000);
+  shiftOut(SER_DATA, SRCLK, LSBFIRST, 0b00001111);
+  shiftOut(SER_DATA, SRCLK, LSBFIRST, 0b01001111);
+  shiftOut(SER_DATA, SRCLK, LSBFIRST, 0b01011011);
+  digitalWrite(LATCH, 1);
+  digitalWrite(LATCH, 0);
+  delay(1000);
+}
 // Wifi ESP8266 > below
 void checkStatusWifi() {
   if(WiFi.status() == WL_CONNECTED) {
@@ -102,6 +130,7 @@ void autoPullData() {
     updateDate();
     onePullQuota = false;
     previousPullDataTimes = 0;
+    display_SET();
   }
 
   currentTimes = millis();
