@@ -2,7 +2,7 @@
 #include <NTPClient.h>
 #include <WiFiUdp.h>
 
-//7-SEGMENT
+//7-SEGMEN
 #include <Arduino.h>
 #include <TM1637Display.h>
 #define CLK D3
