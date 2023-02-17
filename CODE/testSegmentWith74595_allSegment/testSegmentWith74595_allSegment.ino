@@ -12,9 +12,9 @@
 //   {0,1,1,1,1,0,1,1}};  // digit 9 0b01111011
 
 
-#define DATA 3
-#define CLK 4
-#define LATCH 5
+#define DATA D3
+#define CLK D4
+#define LATCH D5
 
 uint8_t digits[10] = {126, 48, 109, 121, 51, 91, 95, 112, 127, 123};  // 0 -> 9 from binary
 uint8_t ick = 0;
@@ -24,16 +24,19 @@ void setup() {
   pinMode(DATA, OUTPUT);
   pinMode(CLK, OUTPUT);
   pinMode(LATCH, OUTPUT);
-  pinMode(2, OUTPUT);
-  digitalWrite(2, 1);
+  pinMode(D2, OUTPUT);
+  digitalWrite(D2, 1);
 }
 
 void loop() {
-    digitalWrite(LATCH, 0);
-    shiftOut(DATA, CLK, LSBFIRST, digits[8]);
-
-    digitalWrite(LATCH, 1);
-    digitalWrite(LATCH, 0);
-    delay(500);
+    
+    for(int i=0;i<=9;i++){
+      digitalWrite(LATCH, 0);
+      shiftOut(DATA, CLK, LSBFIRST, digits[i]);
+      digitalWrite(LATCH, 1);
+      digitalWrite(LATCH, 0);
+      delay(500);
+    }
+    
 
 }

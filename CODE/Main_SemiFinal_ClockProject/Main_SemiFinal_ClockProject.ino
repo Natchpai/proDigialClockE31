@@ -19,10 +19,10 @@
 // 	};
 
 // Shift Register SN74HC595N 8-bit SIPO
-#define SRCLK D8 
+#define SRCLK D5 
 #define SER_DATA D6 
 #define LATCH D7
-#define DOTpin D5
+#define DOTpin D8
 uint8_t digits[10] = {126, 48, 109, 121, 51, 91, 95, 112, 127, 123};  // 0 -> 9 from binary
 uint8_t celsiusUnit[2] = {0b11100011, 0b11001110};
 
@@ -30,7 +30,8 @@ uint8_t celsiusUnit[2] = {0b11100011, 0b11001110};
 #include <Wire.h>
 #include <RtcDS3231.h>
 RtcDS3231<TwoWire> Rtc(Wire);
-#define SquareWave_pin D0
+// D1 -> SCL, D2 -> SDA
+#define SquareWave_pin D0 // D0 -> SQW
 uint8_t SquareWave;
 
 const char* ssid = "NatchPai";                           
@@ -104,6 +105,7 @@ void display_SET() {
   digitalWrite(LATCH, 0);
   delay(1000);
 }
+
 // Wifi ESP8266 > below
 void checkStatusWifi() {
   if(WiFi.status() == WL_CONNECTED) {
