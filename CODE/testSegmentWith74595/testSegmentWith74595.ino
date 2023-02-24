@@ -30,11 +30,12 @@ void setup() {
 
 void loop() {
   for (ick; ick<10; ick++) {
-    digitalWrite(LATCH, 0);
-    shiftOut(DATA, CLK, LSBFIRST, digits[ick]);
 
+    digitalWrite(LATCH, 0);
+    shiftOut(DATA, CLK, LSBFIRST, 0b01111110);
     digitalWrite(LATCH, 1);
     digitalWrite(LATCH, 0);
+
     delay(500);
     Serial.println(ick);
   }
