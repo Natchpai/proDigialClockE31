@@ -10,7 +10,9 @@
 #define LATCH D7
 #define DOTpin D8
 uint8_t digits[10] = {126, 48, 109, 121, 51, 91, 95, 112, 127, 123};  // 0 -> 9 from binary
-uint8_t celsiusUnit[2] = {0b11100011, 0b11001110};
+uint8_t celsiusUnit[2] = {0b01100011, 0b01001110};
+// 0b 0 X X X X X X X
+//      a b c d e f g 
 
 
 // DS3230
@@ -25,7 +27,7 @@ uint8_t SquareWave;
 const char* ssid = "NatchPai";                           
 const char* password = "powerpay4";  
 
-int16_t pullData_hour = 6;
+int16_t pullData_hour = 48;
 bool connection;
 bool onePullQuota = true;
 
@@ -38,7 +40,8 @@ unsigned long previousPullDataTimes;
 unsigned long previousTimes;
 unsigned long previousTimes2;
 unsigned long currentTimes;
-
+unsigned long oldLoadTimes;
+unsigned long newLoadTimes;
 
 void setup() {
   WiFi.mode(WIFI_STA);  
@@ -73,20 +76,35 @@ void TestStart() {
     digitalWrite(DOTpin, !digitalRead(DOTpin));
     digitalWrite(LATCH, 1);
     digitalWrite(LATCH, 0);
-    delay(150);
+    delay(100);
   }
   for(int i=0;i<=4;i++) {
     digitalWrite(LATCH, 0);
     shiftOut(SER_DATA, SRCLK, LSBFIRST, 0b00000000);
     digitalWrite(LATCH, 1);
     digitalWrite(LATCH, 0);
-    delay(150);
+    delay(100);
   }
+
+  LatchData(0b01000000, 0b00000000, 0b00000000, 0b00000000, 126, 126); delay(100);
+  LatchData(0b01000000, 0b01000000, 0b00000000, 0b00000000, 126, 126); delay(100);
+  LatchData(0b01000000, 0b01000000, 0b01000000, 0b00000000, 126, 126); delay(100);
+  LatchData(0b01000000, 0b01000000, 0b01000000, 0b01000000, 126, 126); delay(100);
+  LatchData(0b01000000, 0b01000000, 0b01000000, 0b01100000, 126, 126); delay(100);
+  LatchData(0b01000000, 0b01000000, 0b01000000, 0b01110000, 126, 126); delay(100);
+  LatchData(0b01000000, 0b01000000, 0b01000000, 0b01111000, 126, 126); delay(100);
+  LatchData(0b01000000, 0b01000000, 0b01001000, 0b01111000, 126, 126); delay(100);
+  LatchData(0b01000000, 0b01001000, 0b01001000, 0b01111000, 126, 126); delay(100);
+  LatchData(0b01001000, 0b01001000, 0b01001000, 0b01111000, 126, 126); delay(100);
+  LatchData(0b01001100, 0b01001000, 0b01001000, 0b01111000, 126, 126); delay(100);
+  LatchData(0b01001110, 0b01001000, 0b01001000, 0b01111000, 126, 126); delay(200);
+  display_SET(); delay(300);
+  ResetDisplay(); delay(50);
 }
 
 void display_SET() {
   digitalWrite(LATCH, 0);
-  shiftOut(SER_DATA, SRCLK, LSBFIRST, 0b00001000);
+  shiftOut(SER_DATA, SRCLK, LSBFIRST, 0b01100011);
   shiftOut(SER_DATA, SRCLK, LSBFIRST, 0b00001111);
   shiftOut(SER_DATA, SRCLK, LSBFIRST, 0b01001111);
   shiftOut(SER_DATA, SRCLK, LSBFIRST, 0b01011011);
@@ -140,7 +158,7 @@ void updateDate() {
   uint8_t hour = timeClient.getHours();
   uint8_t min = timeClient.getMinutes();
   uint8_t sec = timeClient.getSeconds() + 1;  // 1 is Fix delay
-  // Serial.println(String(year) +"/"+ String(month)+ "/"  + String(dayMonth)+ " " + String(hour)+ ":"  + String(min)+ ":"  + String(sec));
+
   Rtc.SetDateTime(RtcDateTime(year, month, dayMonth, hour, min, sec));
 
 }
@@ -260,35 +278,39 @@ void blinkDot() {
 
 // MAIN below
 void loop() {
-  setMode();
-  checkStatusWifi();
-  if (mode == 1) {
-    blinkDot();
-    RtcDateTime now = Rtc.GetDateTime();
-    analyzeData(now);
-    // LATCH DATA
-    LatchData(digits[hour_First], digits[hour_End], digits[minute_First], digits[minute_End], digits[second_First], digits[second_End]);
-  }
-  else if (mode == 2) {
-    RtcTemperature temp = Rtc.GetTemperature();
+  // Load time every 50 ms. 
+  // Approximate 20 Frame per second
+  newLoadTimes = millis();
+  if (newLoadTimes - oldLoadTimes >= 50) {
+    oldLoadTimes = newLoadTimes;
+    checkStatusWifi();
+    setMode();
+    if (mode == 1) {
+      blinkDot();
+      RtcDateTime now = Rtc.GetDateTime();
+      analyzeData(now);
+      // LATCH DATA
+      LatchData(digits[hour_First], digits[hour_End], digits[minute_First], digits[minute_End], digits[second_First], digits[second_End]);
+    }
+    else if (mode == 2) {
+      RtcTemperature temp = Rtc.GetTemperature();
 
-    uint8_t temp_F = partitionFirstDigit(temp.AsFloatDegC());
-    uint8_t temp_E = partitionEndDigit(temp.AsFloatDegC());
-    // LATCH DATA
-    digitalWrite(LATCH, 0);
-    shiftOut(SER_DATA, SRCLK, LSBFIRST, 0b00000000);
-    shiftOut(SER_DATA, SRCLK, LSBFIRST, 0b00000000);
-    shiftOut(SER_DATA, SRCLK, LSBFIRST, celsiusUnit[1]);
-    shiftOut(SER_DATA, SRCLK, LSBFIRST, celsiusUnit[0]);
-    shiftOut(SER_DATA, SRCLK, LSBFIRST, digits[temp_E]);
-    shiftOut(SER_DATA, SRCLK, LSBFIRST, digits[temp_F]);
-    digitalWrite(LATCH, 1);
-    digitalWrite(LATCH, 0);
+      uint8_t temp_F = partitionFirstDigit(temp.AsFloatDegC());
+      uint8_t temp_E = partitionEndDigit(temp.AsFloatDegC());
+      // LATCH DATA
+      digitalWrite(LATCH, 0);
+      shiftOut(SER_DATA, SRCLK, LSBFIRST, 0b00000000);
+      shiftOut(SER_DATA, SRCLK, LSBFIRST, 0b00000000);
+      shiftOut(SER_DATA, SRCLK, LSBFIRST, celsiusUnit[1]);
+      shiftOut(SER_DATA, SRCLK, LSBFIRST, celsiusUnit[0]);
+      shiftOut(SER_DATA, SRCLK, LSBFIRST, digits[temp_E]);
+      shiftOut(SER_DATA, SRCLK, LSBFIRST, digits[temp_F]);
+      digitalWrite(LATCH, 1);
+      digitalWrite(LATCH, 0);
+    }
   }
+  if (newLoadTimes < oldLoadTimes) {oldLoadTimes = 0;}
 }
-
-
-
 
 
 
