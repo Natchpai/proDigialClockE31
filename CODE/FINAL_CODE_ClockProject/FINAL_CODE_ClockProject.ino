@@ -247,8 +247,8 @@ void setMode() {
   // }
 
   if (mode == 1) {
-    // 40 Seconds
-    if(countSquare == (40) ) { 
+    // 32 Seconds
+    if(countSquare == (32) ) { 
       countSquare = 0;
       digitalWrite(DOTpin, 0);
       mode = 2;
