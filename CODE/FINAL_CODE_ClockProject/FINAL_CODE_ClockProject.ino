@@ -75,6 +75,7 @@ void TestStart() {
     digitalWrite(LATCH, 1);
     digitalWrite(LATCH, 0);
     delay(100);
+    digitalWrite(DOTpin, LOW);
   }
   for(int i=0;i<=4;i++) {
     digitalWrite(LATCH, 0);
@@ -101,6 +102,7 @@ void TestStart() {
 }
 
 void display_SET() {
+  digitalWrite(DOTpin, LOW);
   digitalWrite(LATCH, 0);
   shiftOut(SER_DATA, SRCLK, LSBFIRST, 0b01100011);
   shiftOut(SER_DATA, SRCLK, LSBFIRST, 0b00001111);
