@@ -37,8 +37,6 @@ WiFiUDP ntp;
 NTPClient timeClient(ntp, "europe.pool.ntp.org", timezone);
 
 unsigned long previousPullDataTimes;
-unsigned long previousTimes;
-unsigned long previousTimes2;
 unsigned long currentTimes;
 unsigned long oldLoadTimes;
 unsigned long newLoadTimes;
@@ -144,7 +142,7 @@ void autoPullData() {
     updateDate();
   }
 
-  if (currentTimes < previousTimes) {previousPullDataTimes = 0;}
+  if (currentTimes < previousPullDataTimes) {previousPullDataTimes = 0;}
 }
 
 void updateDate() {

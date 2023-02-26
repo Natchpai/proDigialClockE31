@@ -1,0 +1,2 @@
+https://github.com/Makuna/Rtc/wiki/RtcDS3231-object
+https://techtutorialsx.com/2017/01/22/esp8266-ds3231-1hz-square-wave-generator/
