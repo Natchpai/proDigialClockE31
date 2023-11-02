@@ -1,3 +1,6 @@
+// Board: esp8266 > NodeMCU 1.0(ESP-12E Module)
+
+
 #include <ESP8266WiFi.h>
 #include <NTPClient.h>
 #include <WiFiUdp.h>
@@ -24,10 +27,10 @@ RtcDS3231<TwoWire> Rtc(Wire);
 uint8_t SquareWave;
 
 
-const char* ssid = "NatchPai";                           
-const char* password = "powerpay4";  
+const char* ssid = "TP-Link_93C4";                           
+const char* password = "47299238";  
 
-int16_t pullData_hour = 48;
+int16_t pullData_hour = 168 * 2; // Max 49 Day , 1176 hours
 bool connection;
 bool onePullQuota = true;
 
