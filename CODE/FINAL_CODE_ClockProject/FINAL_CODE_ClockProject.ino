@@ -30,7 +30,7 @@ uint8_t SquareWave;
 const char* ssid = "TP-Link_93C4";                           
 const char* password = "47299238";  
 
-int16_t pullData_hour = 168 * 2; // Max 49 Day , 1176 hours
+int16_t pullData_hour = 40; // Max 49 Day , 1176 hours
 bool connection;
 bool onePullQuota = true;
 
@@ -145,6 +145,7 @@ void autoPullData() {
   if( (currentTimes - previousPullDataTimes) > (pullData_hour * 3600000)) {
     previousPullDataTimes = currentTimes;
     updateDate();
+    display_SET();
   }
 
   if (currentTimes < previousPullDataTimes) {previousPullDataTimes = 0;}
@@ -160,7 +161,7 @@ void updateDate() {
   uint8_t dayMonth = ptm -> tm_mday;
   uint8_t hour = timeClient.getHours();
   uint8_t min = timeClient.getMinutes();
-  uint8_t sec = timeClient.getSeconds() + 1;  // 1 is Fix delay
+  uint8_t sec = timeClient.getSeconds(); 
 
   Rtc.SetDateTime(RtcDateTime(year, month, dayMonth, hour, min, sec));
 
