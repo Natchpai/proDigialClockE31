@@ -30,7 +30,7 @@ uint8_t SquareWave;
 const char* ssid = "TP-Link_93C4";                           
 const char* password = "47299238";  
 
-int16_t pullData_hour = 40; // Max 49 Day , 1176 hours
+int16_t pullData_hour = 80; // Max 49 Day , 1176 hours
 bool connection;
 bool onePullQuota = true;
 
@@ -100,7 +100,7 @@ void TestStart() {
   LatchData(0b01001000, 0b01001000, 0b01001000, 0b01111000, 126, 126); delay(100);
   LatchData(0b01001100, 0b01001000, 0b01001000, 0b01111000, 126, 126); delay(100);
   LatchData(0b01001110, 0b01001000, 0b01001000, 0b01111000, 126, 126); delay(200);
-  display_SET(); delay(300);
+  // display_SET(); delay(300);
   ResetDisplay(); delay(50);
 }
 
@@ -137,7 +137,7 @@ void autoPullData() {
   if (onePullQuota) {
     updateDate();
     onePullQuota = false;
-    previousPullDataTimes = 0;
+    // previousPullDataTimes = 0;
     display_SET();
   }
 
@@ -161,7 +161,7 @@ void updateDate() {
   uint8_t dayMonth = ptm -> tm_mday;
   uint8_t hour = timeClient.getHours();
   uint8_t min = timeClient.getMinutes();
-  uint8_t sec = timeClient.getSeconds(); 
+  uint8_t sec = timeClient.getSeconds() + 1;  //Fixed time delay
 
   Rtc.SetDateTime(RtcDateTime(year, month, dayMonth, hour, min, sec));
 
@@ -252,7 +252,7 @@ void setMode() {
 
   if (mode == 1) {
     // 32 Seconds
-    if(countSquare == (32) ) { 
+    if(countSquare == (35) ) { 
       countSquare = 0;
       digitalWrite(DOTpin, 0);
       mode = 2;
